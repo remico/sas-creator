@@ -11,7 +11,7 @@ set -ex
 origin="$(readlink -f -- "$0")"
 origin="$(dirname "$origin")"
 
-[ ! -d vendor_vndk ] && git clone https://github.com/phhusson/vendor_vndk -b android-10.0
+[ ! -d "$origin"/vendor_vndk ] && git clone https://github.com/phhusson/vendor_vndk -b android-10.0
 
 targetArch=64
 [ "$1" == 32 ] && targetArch=32
@@ -215,3 +215,9 @@ umount d
 
 e2fsck -f -y s.img || true
 resize2fs -M s.img
+
+# rename & move to the source file's directory
+srcDir=$(dirname `readlink -f "$srcFile"`)
+srcFileName=$(basename "$srcFile")
+dstFileName=$(echo "$srcFileName" | sed "s/_b\(\w\{2\}.img\)/_a\1/")
+[ "$dstFileName" != "$srcFileName" ] && mv s.img "$srcDir"/"$dstFileName" && echo "Output image: $srcDir/$dstFileName" || echo "Output image: ./s.img"
